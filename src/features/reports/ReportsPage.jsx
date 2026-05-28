@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { BarChart, Bar, LineChart, Line, PieChart, Pie, Cell, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
 import Card from '@/shared/components/Card';
@@ -10,6 +10,10 @@ import { formatCurrency } from '@/shared/utils/formatCurrency';
 import { cn } from '@/shared/utils/cn';
 import { DEPARTMENTS } from '@/config/constants';
 import { useToast } from '@/shared/hooks/useToast';
+import api from '@/config/axios';
+import Modal from '@/shared/components/Modal';
+import Badge from '@/shared/components/Badge';
+import Spinner from '@/shared/components/Spinner';
 
 const fadeUp = { hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0 } };
 const COLORS = ['#4F46E5', '#10B981', '#F59E0B', '#EF4444', '#06B6D4', '#8B5CF6', '#EC4899'];
@@ -37,6 +41,46 @@ export default function ReportsPage() {
   const employees = useEmployeeStore((s) => s.employees);
   const [active, setActive] = useState('headcount');
   const toast = useToast();
+
+  const [predictions, setPredictions] = useState([]);
+  const [selectedPrediction, setSelectedPrediction] = useState(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isLoadingPredictions, setIsLoadingPredictions] = useState(false);
+  const [isLoadingDetail, setIsLoadingDetail] = useState(false);
+
+  useEffect(() => {
+    if (active === 'attrition') {
+      const fetchPredictions = async () => {
+        setIsLoadingPredictions(true);
+        try {
+          const response = await api.get('/employees/attrition-predictions');
+          setPredictions(response.data.data || []);
+        } catch (error) {
+          console.error("Failed to fetch attrition predictions", error);
+          toast.error("Failed to connect to the backend AI prediction service.");
+        } finally {
+          setIsLoadingPredictions(false);
+        }
+      };
+      fetchPredictions();
+    }
+  }, [active]);
+
+  const handleAnalyzeClick = async (empId) => {
+    setIsModalOpen(true);
+    setIsLoadingDetail(true);
+    setSelectedPrediction(null);
+    try {
+      const response = await api.get(`/employees/${empId}/attrition-risk`);
+      setSelectedPrediction(response.data.data);
+    } catch (error) {
+      console.error("Failed to fetch detailed risk analysis", error);
+      toast.error("Failed to load detailed attrition risk analysis.");
+      setIsModalOpen(false);
+    } finally {
+      setIsLoadingDetail(false);
+    }
+  };
 
   const deptData = useMemo(() => DEPARTMENTS.map(d => ({ department: d, count: employees.filter(e => e.department === d).length })), [employees]);
   const leaveTypeData = useMemo(() => { const m = {}; mockLeaveRequests.forEach(l => { m[l.type] = (m[l.type] || 0) + l.days; }); return Object.entries(m).map(([name, value]) => ({ name, value })); }, []);
@@ -100,8 +144,161 @@ export default function ReportsPage() {
               )}
             </ResponsiveContainer>
           </Card>
+
+          {active === 'attrition' && (
+            <Card variant="solid" padding="md">
+              <div className="flex items-center justify-between mb-4 border-b border-gray-100 dark:border-gray-800 pb-3">
+                <div>
+                  <h3 className="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2">
+                    <span>🧠</span> Predictive AI Attrition Risk Assessment
+                  </h3>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                    Leverages multi-dimensional features (net salary competitiveness, leave approval rates, recent attendance, and tenure) to estimate attrition probability.
+                  </p>
+                </div>
+              </div>
+
+              {isLoadingPredictions ? (
+                <div className="flex justify-center py-12">
+                  <Spinner size="lg" />
+                </div>
+              ) : (
+                <div className="overflow-x-auto rounded-xl border border-gray-200 dark:border-gray-800">
+                  <table className="w-full text-sm">
+                    <thead>
+                      <tr className="bg-gray-50 dark:bg-gray-800/50 border-b border-gray-200 dark:border-gray-800 text-gray-600 dark:text-gray-300 font-semibold">
+                        <th className="px-4 py-3 text-left">Employee Name</th>
+                        <th className="px-4 py-3 text-left">Department</th>
+                        <th className="px-4 py-3 text-left">Designation</th>
+                        <th className="px-4 py-3 text-left">Risk Score</th>
+                        <th className="px-4 py-3 text-left">Risk Level</th>
+                        <th className="px-4 py-3 text-center">Action</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
+                      {predictions.length > 0 ? (
+                        predictions.map((pred) => (
+                          <tr key={pred.employeeId} className="hover:bg-gray-50/50 dark:hover:bg-gray-800/20 transition-colors">
+                            <td className="px-4 py-3 font-medium text-gray-900 dark:text-white">{pred.name}</td>
+                            <td className="px-4 py-3 text-gray-600 dark:text-gray-400">{pred.department}</td>
+                            <td className="px-4 py-3 text-gray-600 dark:text-gray-400">{pred.designation}</td>
+                            <td className="px-4 py-3">
+                              <div className="flex items-center gap-2">
+                                <div className="w-24 bg-gray-200 dark:bg-gray-700 h-2 rounded-full overflow-hidden">
+                                  <div
+                                    className={cn(
+                                      'h-full rounded-full',
+                                      pred.riskScore > 70 ? 'bg-red-500' : pred.riskScore >= 40 ? 'bg-amber-500' : 'bg-emerald-500'
+                                    )}
+                                    style={{ width: `${pred.riskScore}%` }}
+                                  />
+                                </div>
+                                <span className="font-semibold">{pred.riskScore}%</span>
+                              </div>
+                            </td>
+                            <td className="px-4 py-3">
+                              <Badge
+                                status={
+                                  pred.riskLevel === 'HIGH' ? 'danger' : pred.riskLevel === 'MEDIUM' ? 'warning' : 'success'
+                                }
+                              />
+                            </td>
+                            <td className="px-4 py-3 text-center">
+                              <Button variant="secondary" size="xs" onClick={() => handleAnalyzeClick(pred.employeeId)}>
+                                Analyze Details
+                              </Button>
+                            </td>
+                          </tr>
+                        ))
+                      ) : (
+                        <tr>
+                          <td colSpan="6" className="px-4 py-8 text-center text-gray-400">
+                            No prediction data available. Make sure backend is running and data is seeded.
+                          </td>
+                        </tr>
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </Card>
+          )}
         </div>
       </div>
+
+      {/* AI Detail Modal */}
+      <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title="AI Attrition Risk Analysis" size="lg">
+        {isLoadingDetail ? (
+          <div className="flex flex-col items-center justify-center py-16 gap-3">
+            <Spinner size="lg" />
+            <span className="text-sm text-gray-500 dark:text-gray-400 font-medium">Running feature-weight correlation model...</span>
+          </div>
+        ) : selectedPrediction ? (
+          <div className="space-y-6">
+            {/* Header info */}
+            <div className="flex items-center justify-between border-b border-gray-100 dark:border-gray-800 pb-4">
+              <div>
+                <h4 className="text-xl font-bold text-gray-900 dark:text-white">{selectedPrediction.employeeName}</h4>
+                <p className="text-sm text-gray-500 dark:text-gray-400">{selectedPrediction.department} Department</p>
+              </div>
+              <div className="text-right">
+                <div className="text-xs uppercase tracking-wider text-gray-400 dark:text-gray-500">Risk Probability</div>
+                <div className="flex items-center gap-2 mt-1 justify-end">
+                  <span className={cn(
+                    'text-3xl font-extrabold',
+                    selectedPrediction.riskScore > 70 ? 'text-red-500' : selectedPrediction.riskScore >= 40 ? 'text-amber-500' : 'text-emerald-500'
+                  )}>
+                    {selectedPrediction.riskScore}%
+                  </span>
+                  <Badge status={selectedPrediction.riskLevel === 'HIGH' ? 'danger' : selectedPrediction.riskLevel === 'MEDIUM' ? 'warning' : 'success'} />
+                </div>
+              </div>
+            </div>
+
+            {/* Risk factors */}
+            <div>
+              <h5 className="text-sm font-bold text-red-500 uppercase tracking-wider mb-3">Key Attrition Risk Factors</h5>
+              <div className="bg-red-50/50 dark:bg-red-950/10 border border-red-100 dark:border-red-900/30 rounded-2xl p-4">
+                {selectedPrediction.riskFactors && selectedPrediction.riskFactors.length > 0 ? (
+                  <ul className="space-y-2.5">
+                    {selectedPrediction.riskFactors.map((f, i) => (
+                      <li key={i} className="flex gap-2.5 text-sm text-gray-700 dark:text-gray-300">
+                        <span className="text-red-500 shrink-0 select-none">⚠️</span>
+                        <span>{f}</span>
+                      </li>
+                    ))}
+                  </ul>
+                ) : (
+                  <p className="text-sm text-gray-500 dark:text-gray-400 italic">No significant risk drivers identified. Employee shows high stability profiles.</p>
+                )}
+              </div>
+            </div>
+
+            {/* Recommendations */}
+            <div>
+              <h5 className="text-sm font-bold text-primary-600 dark:text-primary-400 uppercase tracking-wider mb-3">AI Recommendations & Retention Plan</h5>
+              <div className="bg-primary-50/30 dark:bg-primary-950/10 border border-primary-100 dark:border-primary-900/20 rounded-2xl p-4">
+                <ul className="space-y-3">
+                  {selectedPrediction.recommendations && selectedPrediction.recommendations.map((r, i) => (
+                    <li key={i} className="flex items-start gap-3">
+                      <input
+                        type="checkbox"
+                        className="mt-1 h-4 w-4 rounded border-gray-300 text-primary-600 focus:ring-primary-500 dark:border-gray-700 dark:bg-gray-800"
+                        id={`rec-${i}`}
+                      />
+                      <label htmlFor={`rec-${i}`} className="text-sm text-gray-700 dark:text-gray-300 cursor-pointer select-none">
+                        {r}
+                      </label>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+          </div>
+        ) : (
+          <div className="text-center py-8 text-gray-500">Error loading details.</div>
+        )}
+      </Modal>
     </motion.div>
   );
 }
