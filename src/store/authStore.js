@@ -174,6 +174,11 @@ const useAuthStore = create(
       setRole: (role) => {
         set({ role });
       },
+      updateUser: (updatedUser) => {
+        set((state) => ({
+          user: state.user ? { ...state.user, ...updatedUser } : null,
+        }));
+      },
     }),
     {
       name: 'auth-storage',

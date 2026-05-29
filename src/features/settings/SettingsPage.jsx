@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { motion } from 'framer-motion';
 import Card from '@/shared/components/Card';
 import Button from '@/shared/components/Button';
@@ -30,12 +30,21 @@ const accentColors = [
 export default function SettingsPage() {
   const role = useAuthStore((s) => s.role);
   const user = useAuthStore((s) => s.user);
+  const updateUser = useAuthStore((s) => s.updateUser);
   const isDark = useThemeStore((s) => s.isDark);
   const toggleTheme = useThemeStore((s) => s.toggleTheme);
   const toast = useToast();
+  const fileInputRef = useRef(null);
 
   const [tab, setTab] = useState(0);
-  const [profile, setProfile] = useState({ firstName: user?.firstName || '', lastName: user?.lastName || '', phone: '+1 (555) 234-5017', location: 'San Francisco, CA', bio: '' });
+  const [profile, setProfile] = useState({
+    firstName: user?.firstName || '',
+    lastName: user?.lastName || '',
+    phone: user?.phone || '+1 (555) 234-5017',
+    location: user?.location || 'San Francisco, CA',
+    bio: user?.bio || '',
+    avatar: user?.avatar || null
+  });
   const [passwords, setPasswords] = useState({ current: '', new: '', confirm: '' });
   const [twoFA, setTwoFA] = useState(false);
   const [accent, setAccent] = useState('#4F46E5');
@@ -46,6 +55,34 @@ export default function SettingsPage() {
     { type: 'Casual', quota: 3, maxConsec: 2, carryForward: false },
     { type: 'Maternity', quota: 90, maxConsec: 90, carryForward: false },
   ]);
+
+  const handlePhotoChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      if (file.size > 2 * 1024 * 1024) {
+        toast.error('Image size must be less than 2MB');
+        return;
+      }
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setProfile((prev) => ({ ...prev, avatar: reader.result }));
+        toast.info('Photo loaded. Click "Save Changes" to apply.');
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleSave = () => {
+    updateUser({
+      firstName: profile.firstName,
+      lastName: profile.lastName,
+      phone: profile.phone,
+      location: profile.location,
+      bio: profile.bio,
+      avatar: profile.avatar,
+    });
+    toast.success('Profile updated successfully!');
+  };
 
   const tabs = [
     { label: 'Profile', icon: '👤' }, { label: 'Account', icon: '🔐' },
@@ -83,8 +120,13 @@ export default function SettingsPage() {
             <Card variant="solid" padding="lg">
               <h2 className="font-semibold text-gray-900 dark:text-white mb-4">Personal Information</h2>
               <div className="flex items-center gap-4 mb-6">
-                <div className="h-20 w-20 rounded-2xl bg-primary-100 dark:bg-primary-900/30 flex items-center justify-center text-2xl font-bold text-primary-600">{profile.firstName.charAt(0)}{profile.lastName.charAt(0)}</div>
-                <Button variant="outline" size="sm">Change Photo</Button>
+                {profile.avatar ? (
+                  <img src={profile.avatar} alt="Profile" className="h-20 w-20 rounded-2xl object-cover ring-2 ring-primary-500" />
+                ) : (
+                  <div className="h-20 w-20 rounded-2xl bg-primary-100 dark:bg-primary-900/30 flex items-center justify-center text-2xl font-bold text-primary-600">{profile.firstName.charAt(0)}{profile.lastName.charAt(0)}</div>
+                )}
+                <Button variant="outline" size="sm" onClick={() => fileInputRef.current?.click()}>Change Photo</Button>
+                <input type="file" ref={fileInputRef} onChange={handlePhotoChange} accept="image/*" className="hidden" />
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 {[['First Name', 'firstName'], ['Last Name', 'lastName'], ['Phone', 'phone'], ['Location', 'location']].map(([label, key]) => (
@@ -92,7 +134,7 @@ export default function SettingsPage() {
                 ))}
                 <div className="sm:col-span-2"><label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Bio</label><textarea value={profile.bio} onChange={e => setProfile(p => ({ ...p, bio: e.target.value }))} rows={3} className="w-full px-3 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500/50" placeholder="Tell us about yourself..." /></div>
               </div>
-              <Button variant="primary" className="mt-4" onClick={() => toast.success('Profile updated successfully!')}>Save Changes</Button>
+              <Button variant="primary" className="mt-4" onClick={handleSave}>Save Changes</Button>
             </Card>
           )}
 
