@@ -20,6 +20,7 @@ const features = [
 export default function LoginPage() {
   const navigate = useNavigate();
   const login = useAuthStore((s) => s.login);
+  const instantDemoLogin = useAuthStore((s) => s.instantDemoLogin);
   const verifyMfa = useAuthStore((s) => s.verifyMfa);
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
 
@@ -72,25 +73,12 @@ export default function LoginPage() {
     }
   };
 
-  const handleDemoLogin = async (account) => {
+  const handleDemoLogin = (account) => {
     setEmail(account.email);
     setPassword('nexus123');
     setError('');
-    setLoading(true);
-    try {
-      const result = await login({ email: account.email, password: 'nexus123' });
-      if (result?.mfaRequired) {
-        setMfaRequired(true);
-        setMfaToken(result.mfaToken);
-        setMfaEmail(result.email);
-      } else {
-        navigate('/dashboard', { replace: true });
-      }
-    } catch (err) {
-      setError(err.message);
-    } finally {
-      setLoading(false);
-    }
+    instantDemoLogin(account.email);
+    navigate('/dashboard', { replace: true });
   };
 
   const handleMfaSubmit = async (e) => {
