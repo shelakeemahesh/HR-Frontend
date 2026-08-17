@@ -11,6 +11,13 @@ const useToastStore = create((set, get) => ({
   removeToast: (id) => set({ toasts: get().toasts.filter(t => t.id !== id) }),
 }));
 
+export const toast = {
+  success: (message) => useToastStore.getState().addToast({ type: 'success', message }),
+  error: (message) => useToastStore.getState().addToast({ type: 'error', message }),
+  warning: (message) => useToastStore.getState().addToast({ type: 'warning', message }),
+  info: (message) => useToastStore.getState().addToast({ type: 'info', message }),
+};
+
 export const useToast = () => {
   const addToast = useToastStore((s) => s.addToast);
   return {
