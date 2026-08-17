@@ -66,4 +66,4 @@ The output assets will be generated in the `dist/` directory.
    * **Framework Preset**: `Vite`
    * **Build Command**: `npm run build`
    * **Output Directory**: `dist`
-   * **Environment Variables**: Add `VITE_API_URL` pointing to your deployed Render backend (e.g. `https://hr-backend-76wf.onrender.com`).
+   * **Environment Variables**: Add `VITE_API_URL` pointing to your deployed Render backend (`https://hr-backend-qmfh.onrender.com`).
