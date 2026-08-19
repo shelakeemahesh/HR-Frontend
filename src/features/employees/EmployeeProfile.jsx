@@ -90,7 +90,7 @@ export default function EmployeeProfile() {
               </div>
             </div>
           </div>
-          {(role === ROLES.ADMIN || role === ROLES.HR) && <Button variant="outline" className="w-full mt-4">Edit Profile</Button>}
+          {role === ROLES.HR && <Button variant="outline" className="w-full mt-4">Edit Profile</Button>}
         </Card>
 
         {/* Tabs */}

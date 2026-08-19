@@ -5,9 +5,8 @@ import useAuthStore from '../../store/authStore';
 import Button from '../../shared/components/Button';
 
 const demoAccounts = [
-  { label: 'Admin', email: 'admin@nexushr.com', role: 'ADMIN' },
-  { label: 'HR Manager', email: 'hr@nexushr.com', role: 'HR' },
-  { label: 'Employee', email: 'employee@nexushr.com', role: 'EMPLOYEE' },
+  { label: '👔 HR Manager', email: 'hr@nexushr.com', role: 'HR' },
+  { label: '👤 Employee', email: 'employee@nexushr.com', role: 'EMPLOYEE' },
 ];
 
 const features = [
@@ -349,13 +348,13 @@ export default function LoginPage() {
                   <span className="px-4 text-xs text-gray-500 bg-gradient-to-r from-transparent via-primary-950/80 to-transparent">Quick demo access</span>
                 </div>
               </div>
-              <div className="grid grid-cols-3 gap-2.5">
+              <div className="grid grid-cols-2 gap-3">
                 {demoAccounts.map((acc) => (
                   <button
                     key={acc.role}
                     onClick={() => handleDemoLogin(acc)}
                     disabled={loading}
-                    className="py-2.5 rounded-xl bg-white/[0.06] border border-white/10 text-xs sm:text-sm font-medium text-gray-300 hover:bg-white/[0.1] hover:border-primary-500/30 hover:text-white transition-all duration-200 disabled:opacity-50 text-center"
+                    className="py-3 px-4 rounded-xl bg-white/[0.06] border border-white/10 text-sm font-medium text-gray-200 hover:bg-white/[0.1] hover:border-primary-500/30 hover:text-white transition-all duration-200 disabled:opacity-50 text-center flex items-center justify-center gap-2"
                   >
                     {acc.label}
                   </button>

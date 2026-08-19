@@ -83,12 +83,12 @@ export default function DashboardPage() {
   ];
 
   const quickActions = [
-    { label: 'Add Employee', icon: '➕', action: () => navigate('/employees'), roles: [ROLES.ADMIN, ROLES.HR] },
-    { label: 'Apply Leave', icon: '📝', action: () => navigate('/leaves'), roles: [ROLES.ADMIN, ROLES.HR, ROLES.EMPLOYEE] },
-    { label: 'Download Payslip', icon: '📄', action: () => navigate('/payroll'), roles: [ROLES.ADMIN, ROLES.HR] },
-    { label: 'Mark Attendance', icon: '✅', action: () => navigate('/attendance'), roles: [ROLES.ADMIN, ROLES.HR, ROLES.EMPLOYEE] },
-    { label: 'Upload Document', icon: '📎', action: () => {}, roles: [ROLES.ADMIN, ROLES.HR, ROLES.EMPLOYEE] },
-    { label: 'Generate Report', icon: '📊', action: () => navigate('/reports'), roles: [ROLES.ADMIN, ROLES.HR] },
+    { label: 'Add Employee', icon: '➕', action: () => navigate('/employees'), roles: [ROLES.HR] },
+    { label: 'Apply Leave', icon: '📝', action: () => navigate('/leaves'), roles: [ROLES.HR, ROLES.EMPLOYEE] },
+    { label: 'Download Payslip', icon: '📄', action: () => navigate('/payroll'), roles: [ROLES.HR, ROLES.EMPLOYEE] },
+    { label: 'Mark Attendance', icon: '✅', action: () => navigate('/attendance'), roles: [ROLES.HR, ROLES.EMPLOYEE] },
+    { label: 'Upload Document', icon: '📎', action: () => {}, roles: [ROLES.HR, ROLES.EMPLOYEE] },
+    { label: 'Generate Report', icon: '📊', action: () => navigate('/reports'), roles: [ROLES.HR] },
   ].filter(a => a.roles.includes(role));
 
   return (

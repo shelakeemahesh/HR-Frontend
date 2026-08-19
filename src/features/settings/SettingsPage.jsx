@@ -87,7 +87,7 @@ export default function SettingsPage() {
   const tabs = [
     { label: 'Profile', icon: '👤' }, { label: 'Account', icon: '🔐' },
     { label: 'Appearance', icon: '🎨' }, { label: 'Notifications', icon: '🔔' },
-    ...(role === ROLES.ADMIN ? [{ label: 'Leave Policy', icon: '📋' }] : []),
+    ...(role === ROLES.HR ? [{ label: 'Leave Policy', icon: '📋' }] : []),
   ];
 
   const pwStrength = () => {
@@ -197,8 +197,8 @@ export default function SettingsPage() {
             </Card>
           )}
 
-          {/* Leave Policy (Admin) */}
-          {tab === 4 && role === ROLES.ADMIN && (
+          {/* Leave Policy (HR Manager) */}
+          {tab === 4 && role === ROLES.HR && (
             <Card variant="solid" padding="lg">
               <h2 className="font-semibold text-gray-900 dark:text-white mb-4">Leave Policy Configuration</h2>
               <div className="overflow-x-auto">

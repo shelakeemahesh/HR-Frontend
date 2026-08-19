@@ -62,7 +62,7 @@ export default function EmployeesPage() {
     { key: 'actions', label: 'Actions', render: (_, row) => (
       <div className="flex gap-1">
         <Button variant="ghost" size="sm" onClick={() => navigate(`/employees/${row.id}`)}>View</Button>
-        {(role === ROLES.ADMIN || role === ROLES.HR) && (
+        {role === ROLES.HR && (
           <>
             <Button variant="ghost" size="sm" onClick={() => navigate(`/employees/${row.id}`)}>Edit</Button>
             <Button variant="ghost" size="sm" className="text-red-500 hover:text-red-700" onClick={() => deleteEmployee(row.id)}>Delete</Button>
@@ -81,7 +81,7 @@ export default function EmployeesPage() {
           <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Employees</h1>
           <Badge status="info">{employees.length}</Badge>
         </div>
-        {(role === ROLES.ADMIN || role === ROLES.HR) && (
+        {role === ROLES.HR && (
           <Button variant="primary" icon={<svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" /></svg>} onClick={() => setShowAdd(true)}>Add Employee</Button>
         )}
       </motion.div>

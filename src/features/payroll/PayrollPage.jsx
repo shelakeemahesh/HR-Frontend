@@ -75,7 +75,7 @@ export default function PayrollPage() {
           <select value={month} onChange={e => setMonth(e.target.value)} className="px-3 py-2 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm text-gray-700 dark:text-gray-300 focus:outline-none focus:ring-2 focus:ring-primary-500/50">
             <option value="2026-05">May 2026</option><option value="2026-04">Apr 2026</option><option value="2026-03">Mar 2026</option><option value="2026-02">Feb 2026</option><option value="2026-01">Jan 2026</option><option value="2025-12">Dec 2025</option>
           </select>
-          {role === ROLES.ADMIN && pending > 0 && (
+          {role === ROLES.HR && pending > 0 && (
             <Button variant="primary" onClick={() => setShowRunConfirm(true)}>Run Payroll</Button>
           )}
         </div>

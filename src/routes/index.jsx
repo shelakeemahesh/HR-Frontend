@@ -19,8 +19,8 @@ import ProfilePage from '../features/profile/ProfilePage';
 import NotFoundPage from '../features/errors/NotFoundPage';
 import UnauthorizedPage from '../features/errors/UnauthorizedPage';
 
-const allRoles = [ROLES.ADMIN, ROLES.HR, ROLES.EMPLOYEE];
-const adminHR = [ROLES.ADMIN, ROLES.HR];
+const allRoles = [ROLES.HR, ROLES.EMPLOYEE];
+const hrOnly = [ROLES.HR];
 
 function RootRedirect() {
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
@@ -43,10 +43,10 @@ export default function AppRoutes() {
       <Route path="/leaves" element={<ProtectedRoute allowedRoles={allRoles}><MainLayout><LeavesPage /></MainLayout></ProtectedRoute>} />
 
       {/* Part 3 — Feature Modules */}
-      <Route path="/payroll" element={<ProtectedRoute allowedRoles={adminHR}><MainLayout><PayrollPage /></MainLayout></ProtectedRoute>} />
+      <Route path="/payroll" element={<ProtectedRoute allowedRoles={hrOnly}><MainLayout><PayrollPage /></MainLayout></ProtectedRoute>} />
       <Route path="/performance" element={<ProtectedRoute allowedRoles={allRoles}><MainLayout><PerformancePage /></MainLayout></ProtectedRoute>} />
-      <Route path="/reports" element={<ProtectedRoute allowedRoles={adminHR}><MainLayout><ReportsPage /></MainLayout></ProtectedRoute>} />
-      <Route path="/recruitment" element={<ProtectedRoute allowedRoles={[ROLES.HR]}><MainLayout><RecruitmentPage /></MainLayout></ProtectedRoute>} />
+      <Route path="/reports" element={<ProtectedRoute allowedRoles={hrOnly}><MainLayout><ReportsPage /></MainLayout></ProtectedRoute>} />
+      <Route path="/recruitment" element={<ProtectedRoute allowedRoles={hrOnly}><MainLayout><RecruitmentPage /></MainLayout></ProtectedRoute>} />
       <Route path="/notifications" element={<ProtectedRoute allowedRoles={allRoles}><MainLayout><NotificationsPage /></MainLayout></ProtectedRoute>} />
       <Route path="/settings" element={<ProtectedRoute allowedRoles={allRoles}><MainLayout><SettingsPage /></MainLayout></ProtectedRoute>} />
       <Route path="/profile" element={<ProtectedRoute allowedRoles={allRoles}><MainLayout><ProfilePage /></MainLayout></ProtectedRoute>} />

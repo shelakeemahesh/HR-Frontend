@@ -2,7 +2,6 @@ export const APP_NAME = 'NexusHR';
 export const APP_TAGLINE = 'Enterprise HR Management';
 
 export const ROLES = {
-  ADMIN: 'ADMIN',
   HR: 'HR',
   EMPLOYEE: 'EMPLOYEE',
 };

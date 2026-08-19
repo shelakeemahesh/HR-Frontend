@@ -3,27 +3,18 @@ import { persist } from 'zustand/middleware';
 import api from '../config/axios';
 
 /**
- * Role mapping: Backend uses ADMIN / MANAGER / USER
- * Frontend uses ADMIN / HR / EMPLOYEE
+ * Role mapping:
+ * - HR: Full administrative authority
+ * - EMPLOYEE: Self-service portal
  */
 const mapBackendRole = (backendRole) => {
-  const roleMap = {
-    ADMIN: 'ADMIN',
-    MANAGER: 'HR',
-    USER: 'EMPLOYEE',
-  };
-  return roleMap[backendRole] || 'EMPLOYEE';
+  if (backendRole === 'HR' || backendRole === 'MANAGER' || backendRole === 'ADMIN') {
+    return 'HR';
+  }
+  return 'EMPLOYEE';
 };
 
 const demoUsers = {
-  'admin@nexushr.com': {
-    email: 'admin@nexushr.com',
-    firstName: 'Admin',
-    lastName: 'User',
-    role: 'ADMIN',
-    department: 'Human Resources',
-    designation: 'System Administrator',
-  },
   'hr@nexushr.com': {
     email: 'hr@nexushr.com',
     firstName: 'HR',
