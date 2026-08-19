@@ -46,7 +46,7 @@ export default function AppRoutes() {
       <Route path="/payroll" element={<ProtectedRoute allowedRoles={adminHR}><MainLayout><PayrollPage /></MainLayout></ProtectedRoute>} />
       <Route path="/performance" element={<ProtectedRoute allowedRoles={allRoles}><MainLayout><PerformancePage /></MainLayout></ProtectedRoute>} />
       <Route path="/reports" element={<ProtectedRoute allowedRoles={adminHR}><MainLayout><ReportsPage /></MainLayout></ProtectedRoute>} />
-      <Route path="/recruitment" element={<ProtectedRoute allowedRoles={adminHR}><MainLayout><RecruitmentPage /></MainLayout></ProtectedRoute>} />
+      <Route path="/recruitment" element={<ProtectedRoute allowedRoles={[ROLES.HR]}><MainLayout><RecruitmentPage /></MainLayout></ProtectedRoute>} />
       <Route path="/notifications" element={<ProtectedRoute allowedRoles={allRoles}><MainLayout><NotificationsPage /></MainLayout></ProtectedRoute>} />
       <Route path="/settings" element={<ProtectedRoute allowedRoles={allRoles}><MainLayout><SettingsPage /></MainLayout></ProtectedRoute>} />
       <Route path="/profile" element={<ProtectedRoute allowedRoles={allRoles}><MainLayout><ProfilePage /></MainLayout></ProtectedRoute>} />

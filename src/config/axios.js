@@ -15,7 +15,7 @@ api.interceptors.request.use(
     if (stored) {
       try {
         const { state } = JSON.parse(stored);
-        if (state?.token) {
+        if (state?.token && !state.token.startsWith('demo-')) {
           config.headers.Authorization = `Bearer ${state.token}`;
         }
       } catch {
@@ -27,11 +27,21 @@ api.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
-// Response interceptor — handle 401 auto-logout
+// Response interceptor — handle 401
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error.response?.status === 401 && !error.config?.url?.includes('/auth/')) {
+    // Only auto-logout if NOT in demo mode and NOT during auth routes
+    const stored = localStorage.getItem('auth-storage');
+    let isDemoToken = false;
+    if (stored) {
+      try {
+        const { state } = JSON.parse(stored);
+        isDemoToken = Boolean(state?.token?.startsWith('demo-'));
+      } catch {}
+    }
+
+    if (error.response?.status === 401 && !error.config?.url?.includes('/auth/') && !isDemoToken) {
       localStorage.removeItem('auth-storage');
       window.location.href = '/login';
     }
